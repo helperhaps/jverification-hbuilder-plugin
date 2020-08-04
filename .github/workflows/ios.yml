@@ -49,7 +49,7 @@ jobs:
         xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.BUILD_DIR }}
         ls -al ${{ steps.dir.outputs.BUILD_DIR }} 
         ls -al ${{ steps.dir.outputs.BUILD_DIR }}/${{ steps.variables.outputs.FRAMEWORK_NAME }}.framework
-  
+
   download:
     runs-on: ubuntu-latest
 
@@ -57,12 +57,13 @@ jobs:
     - name: variables
       id: variables
       run: |
-        echo ::set-output name=IOS_RELEASE_FILE::jverification-ios-release.zip
-        echo ::set-output name=ANDROID_RELEASE_FILE::jverification-android-release.zip
-    - name: download release and unzip
+        echo ::set-output name=RELEASE_DIR::/tmp/releases
+        echo ::set-output name=IOS_RELEASE_FILE::jverification-ios-release
+        echo ::set-output name=ANDROID_RELEASE_FILE::jverification-android-release
+    - name: download official sdk releases and decompress them
       run : |
-        curl -JL https://www.jiguang.cn/downloads/sdk/verification_ios -o /tmp/${{ steps.variables.outputs.IOS_RELEASE_FILE }}
-        cd /tmp
+        mkdir ${{ steps.variables.outputs.RELEASE_DIR }}
+        curl -JL https://www.jiguang.cn/downloads/sdk/verification_ios -o ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.variables.outputs.IOS_RELEASE_FILE }}.zip
+        cd ${{ steps.variables.outputs.RELEASE_DIR }}
         unzip ${{ steps.variables.outputs.IOS_RELEASE_FILE }}
-        ls -alh
-
+        ls -alh ${{ steps.variables.outputs.IOS_RELEASE_FILE }}
