@@ -79,4 +79,4 @@ jobs:
         cd ${{ steps.variables.outputs.RELEASE_DIR }}
         curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
         unzip ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
-        ls -alh ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+        ls -alh 
