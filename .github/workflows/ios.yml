@@ -1,0 +1,51 @@
+# This is a basic workflow to help you get started with Actions
+
+name: build ios release
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the jg branch
+on:
+  push:
+    branches: [ jg ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: macOS-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: variables
+      id: variables
+      run: |
+        echo ::set-output name=SDK_DIR::`pwd`/UniPlugin-JVerification-iOS
+        echo ::set-output name=WORK_DIR::`pwd`/UniPlugin-JVerification-iOS/HBuilder-uniPluginDemo/UniPluginJVerification
+        echo ::set-output name=ASSERTS_DIR::`pwd`/assets
+        echo ::set-output name=FRAMEWORK_NAME::UniPluginJVerification
+        echo ::set-output name=PROJECTNAME::HBuilder-uniPlugin
+        echo ::set-output name=HBUILDER_IOS_SDK_NAME::iOSSDK@2.7.9.80164_20200527
+    - name: dir
+      id: dir
+      run: |
+        echo ::set-output name=BUILD_DIR::${{ steps.variables.outputs.WORK_DIR }}/build
+        echo ::set-output name=HBUILDER_IOS_SDK_LIB_DIR::${{ steps.variables.outputs.ASSERTS_DIR }}/${{ steps.variables.outputs.HBUILDER_IOS_SDK_NAME }}/SDK
+
+    - name: New Folder
+      run: mkdir ${{ steps.dir.outputs.BUILD_DIR }}
+
+    - name: Force XCode 11.3
+      run: sudo xcode-select -switch /Applications/Xcode_11.6.app
+
+    - name: xcodebuild
+      run: |
+        cd ${{ steps.variables.outputs.WORK_DIR }}
+        cp -a ${{ steps.dir.outputs.HBUILDER_IOS_SDK_LIB_DIR }} ${{ steps.variables.outputs.SDK_DIR }}
+        # xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} HEADER_SEARCH_PATHS=${{ steps.dir.outputs.HBUILDER_IOS_SDK_LIB_DIR }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.BUILD_DIR }}
+        xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.BUILD_DIR }}
+        ls -al ${{ steps.dir.outputs.BUILD_DIR }} 
+        ls -al ${{ steps.dir.outputs.BUILD_DIR }}/${{ steps.variables.outputs.FRAMEWORK_NAME }}.framework
