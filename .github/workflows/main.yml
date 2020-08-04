@@ -88,4 +88,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: LS
-      id: ls ${{ env.DIST_DIR }}
+      run: ls ${{ env.DIST_DIR }}
