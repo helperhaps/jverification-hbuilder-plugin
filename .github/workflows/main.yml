@@ -1,4 +1,4 @@
-name: build ios release
+name: main work
 
 on:
   push:
