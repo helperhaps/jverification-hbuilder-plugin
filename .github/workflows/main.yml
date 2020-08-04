@@ -1,9 +1,12 @@
 name: main work
 
+# on:
+#   push:
+#     branches: [ jg ]
 on:
   push:
-    branches: [ jg ]
-
+    tags: 
+      - 'v*.*.*'
 jobs:
   build:
     runs-on: macOS-latest
@@ -113,4 +116,35 @@ jobs:
         path: /tmp/dist
     - name: LS
       run: |
-        ls -alR /tmp/dist
+        ls -al /tmp/dist
+
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    - name: Build project 
+      run: |
+        tar -jcvf jver-${{ steps.get_version.outputs.VERSION }}.tar.gz /tmp/dist
+        ls -al
+        echo ${{ steps.get_version.outputs.VERSION }}
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: ${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+          
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./jver-${{ steps.get_version.outputs.VERSION }}.tar.gz
+        asset_name: jver-${{ steps.get_version.outputs.VERSION }}.tar.gz
+        asset_content_type: application/zip
