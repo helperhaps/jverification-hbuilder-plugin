@@ -4,9 +4,6 @@ on:
   push:
     branches: [ jg ]
 
-env:
-  DIST_DIR: /tmp/dist
-
 jobs:
   build:
     runs-on: macOS-latest
@@ -31,7 +28,7 @@ jobs:
         echo ::set-output name=HBUILDER_IOS_SDK_LIB_DIR::${{ steps.variables.outputs.ASSERTS_DIR }}/${{ steps.variables.outputs.HBUILDER_IOS_SDK_NAME }}/SDK
 
     - name: New Folder
-      run: mkdir ${{ steps.dir.outputs.BUILD_DIR }} ${{ env.DIST_DIR }}
+      run: mkdir ${{ steps.dir.outputs.BUILD_DIR }}
 
     - name: Force XCode 11.3
       run: sudo xcode-select -switch /Applications/Xcode_11.6.app
@@ -68,7 +65,7 @@ jobs:
         echo ::set-output name=ANDROID_RELEASE_FILE::jverification-android-release-${{ steps.variables.outputs.SDK_RELEASE_VERSION }}
     
     - name: New Folder
-      run: mkdir ${{ steps.variables.outputs.RELEASE_DIR }} ${{ env.DIST_DIR }}
+      run: mkdir ${{ steps.variables.outputs.RELEASE_DIR }}
 
     - name: Cache Releases
       id: cache-releases
@@ -85,14 +82,17 @@ jobs:
         curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
         unzip ${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
         unzip ${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
-        ls -alh 
-        cp -a ${{ steps.vars.outputs.IOS_RELEASE_FILE }} ${{ env.DIST_DIR }}
+
+    - name: LS
+      run: |
+        cd ${{ steps.variables.outputs.RELEASE_DIR }}
+        ls -alh
 
     - name: Upload SDK
       uses: actions/upload-artifact@v2
       with:
         name: jiguang-sdk
-        path: ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+        path: ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
 
   release:
     needs: [build, download]
