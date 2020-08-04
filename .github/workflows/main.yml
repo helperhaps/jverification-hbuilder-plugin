@@ -44,7 +44,12 @@ jobs:
         xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.BUILD_DIR }}
         ls -al ${{ steps.dir.outputs.BUILD_DIR }} 
         ls -al ${{ steps.dir.outputs.BUILD_DIR }}/${{ steps.variables.outputs.FRAMEWORK_NAME }}.framework
-        cp -a ${{ steps.dir.outputs.BUILD_DIR }} ${{ env.DIST_DIR }}
+
+    - name: Upload build DIST
+      uses: actions/upload-artifact@v2
+      with:
+        name: ios-dist
+        path: ${{ steps.dir.outputs.BUILD_DIR }}
 
   download:
     runs-on: ubuntu-latest
@@ -83,9 +88,21 @@ jobs:
         ls -alh 
         cp -a ${{ steps.vars.outputs.IOS_RELEASE_FILE }} ${{ env.DIST_DIR }}
 
+    - name: Upload SDK
+      uses: actions/upload-artifact@v2
+      with:
+        name: jiguang-sdk
+        path: ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+
   release:
     needs: [build, download]
     runs-on: ubuntu-latest
+    
     steps:
+    - name: Download Data
+      uses: actions/download-artifact@v2
+      with:
+        name: jiguang-sdk
     - name: LS
-      run: ls ${{ env.DIST_DIR }}
+      run: |
+        ls -al 
