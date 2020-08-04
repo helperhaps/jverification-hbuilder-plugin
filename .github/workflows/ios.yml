@@ -70,7 +70,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ steps.variables.outputs.RELEASE_DIR }}
-        key: ${{ runner.os }}-sdk-releases
+        key: ${{ runner.os }}-sdk-releases-${{ steps.variables.outputs.SDK_RELEASE_VERSION }}
 
     - name: download official sdk releases and decompress them
       if: steps.cache-releases.outputs.cache-hit != 'true'
@@ -78,5 +78,7 @@ jobs:
         mkdir ${{ steps.variables.outputs.RELEASE_DIR }}
         cd ${{ steps.variables.outputs.RELEASE_DIR }}
         curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+        curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
         unzip ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+        unzip ${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
         ls -alh 
