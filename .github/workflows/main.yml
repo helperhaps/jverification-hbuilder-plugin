@@ -84,7 +84,7 @@ jobs:
         cp -a ${{ steps.vars.outputs.IOS_RELEASE_FILE }} ${{ env.DIST_DIR }}
 
   release:
-    need: [build, download]
+    needs: [build, download]
     runs-on: ubuntu-latest
     steps:
     - name: LS
