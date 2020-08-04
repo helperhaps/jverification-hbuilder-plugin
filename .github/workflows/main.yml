@@ -92,7 +92,9 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: jiguang-sdk
-        path: ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+        path: |
+          ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
+          ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
 
   release:
     needs: [build, download]
@@ -103,6 +105,12 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: jiguang-sdk
+        path: /tmp/dist
+    - name: Download Data
+      uses: actions/download-artifact@v2
+      with:
+        name: ios-dist
+        path: /tmp/dist
     - name: LS
       run: |
-        ls -al 
+        ls -alR /tmp/dist
