@@ -101,7 +101,7 @@ jobs:
 
 
   release:
-    needs: [build, download]
+    needs: [download, build-ios]
     runs-on: ubuntu-latest
     
     steps:
