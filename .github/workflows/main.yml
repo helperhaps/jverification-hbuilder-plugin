@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
+  build-ios:
     runs-on: macOS-latest
 
     steps:
@@ -32,14 +32,15 @@ jobs:
       run: mkdir ${{ steps.dir.outputs.IOS_BUILD_DIR }}
 
     - name: Unzip hbuilder sdk
-      run: unzip ${{ steps.dir.outputs.HBUILDER_IOS_SDK_LIB_FILE }} -d ${{ steps.variables.outputs.IOS_SDK_DIR }}
+      run: unzip ${{ steps.dir.outputs.HBUILDER_IOS_SDK_LIB_FILE }} -d ${{ steps.variables.outputs.ASSERTS_DIR }}
+
     - name: Force XCode 11.3
       run: sudo xcode-select -switch /Applications/Xcode_11.6.app
 
     - name: xcodebuild
       run: |
         cd ${{ steps.variables.outputs.IOS_WORK_DIR }}
-        xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.IOS_BUILD_DIR }}
+        xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO HEADER_SEARCH_PATH="$(inherited) ${{ steps.variables.outputs.ASSERTS_DIR }}/SDK/inc" OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.IOS_BUILD_DIR }}
         ls -al ${{ steps.dir.outputs.IOS_BUILD_DIR }} 
         ls -al ${{ steps.dir.outputs.IOS_BUILD_DIR }}/${{ steps.variables.outputs.FRAMEWORK_NAME }}.framework
 
@@ -48,6 +49,7 @@ jobs:
       with:
         name: ios-dist
         path: ${{ steps.dir.outputs.IOS_BUILD_DIR }}
+
 
   download:
     runs-on: ubuntu-latest
@@ -96,6 +98,7 @@ jobs:
         path: |
           ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}
           ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
+
 
   release:
     needs: [build, download]
