@@ -16,26 +16,26 @@ jobs:
     - name: variables
       id: vars
       run: |
-        echo ::set-output name=FRAMEWORK_NAME::UniPluginJVerification
         echo ::set-output name=PROJECTNAME::HBuilder-uniPlugin
+
+        echo ::set-output name=FRAMEWORK_NAME::UniPluginJVerification
         echo ::set-output name=HBUILDER_IOS_SDK_NAME::iOSSDK@2.7.9.80164_20200527
         echo ::set-output name=ASSERTS_DIR::`pwd`/assets
         echo ::set-output name=IOS_BUILD_DIR::/tmp/build
-        echo ::set-output name=IOS_SDK_DIR::`pwd`/UniPlugin-JVerification-iOS
-        echo ::set-output name=IOS_WORK_DIR::`pwd`/UniPlugin-JVerification-iOS/HBuilder-uniPluginDemo/UniPluginJVerification
+        echo ::set-output name=IOS_WORK_DIR::`pwd`/UniPlugin-JVerification-iOS
 
     - name: New Folder
       run: mkdir ${{ steps.vars.outputs.IOS_BUILD_DIR }}
 
     - name: Unzip hbuilder sdk
-      run: unzip ${{ steps.vars.outputs.ASSERTS_DIR }}/${{ steps.vars.outputs.HBUILDER_IOS_SDK_NAME }}.zip -d ${{ steps.vars.outputs.IOS_SDK_DIR }}
+      run: unzip ${{ steps.vars.outputs.ASSERTS_DIR }}/${{ steps.vars.outputs.HBUILDER_IOS_SDK_NAME }}.zip -d ${{ steps.vars.outputs.IOS_WORK_DIR }}
 
     - name: Force XCode 11.3
       run: sudo xcode-select -switch /Applications/Xcode_11.6.app
 
     - name: xcodebuild
       run: |
-        cd ${{ steps.vars.outputs.IOS_WORK_DIR }}
+        cd ${{ steps.vars.outputs.IOS_WORK_DIR }}/HBuilder-uniPluginDemo/UniPluginJVerification
         xcodebuild -scheme ${{ steps.vars.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.vars.outputs.IOS_BUILD_DIR }}
         ls -al ${{ steps.vars.outputs.IOS_BUILD_DIR }}
         ls -al ${{ steps.vars.outputs.IOS_BUILD_DIR }}/${{ steps.vars.outputs.FRAMEWORK_NAME }}.framework
@@ -43,7 +43,7 @@ jobs:
     - name: Upload build DIST
       uses: actions/upload-artifact@v2
       with:
-        name: ios-dist
+        name: ios-build-asset
         path: ${{ steps.vars.outputs.IOS_BUILD_DIR }}
 
 
@@ -109,7 +109,7 @@ jobs:
     - name: Download Data
       uses: actions/download-artifact@v2
       with:
-        name: ios-dist
+        name: ios-build-asset
         path: /tmp/dist
     - name: LS
       run: |
