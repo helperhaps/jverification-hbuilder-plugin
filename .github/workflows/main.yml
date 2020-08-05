@@ -14,41 +14,37 @@ jobs:
       uses: actions/checkout@v2
 
     - name: variables
-      id: variables
+      id: vars
       run: |
         echo ::set-output name=FRAMEWORK_NAME::UniPluginJVerification
         echo ::set-output name=PROJECTNAME::HBuilder-uniPlugin
         echo ::set-output name=HBUILDER_IOS_SDK_NAME::iOSSDK@2.7.9.80164_20200527
         echo ::set-output name=ASSERTS_DIR::`pwd`/assets
+        echo ::set-output name=IOS_BUILD_DIR::/tmp/build
         echo ::set-output name=IOS_SDK_DIR::`pwd`/UniPlugin-JVerification-iOS
         echo ::set-output name=IOS_WORK_DIR::`pwd`/UniPlugin-JVerification-iOS/HBuilder-uniPluginDemo/UniPluginJVerification
-    - name: dir
-      id: dir
-      run: |
-        echo ::set-output name=IOS_BUILD_DIR::${{ steps.variables.outputs.IOS_WORK_DIR }}/build
-        echo ::set-output name=HBUILDER_IOS_SDK_LIB_FILE::${{ steps.variables.outputs.ASSERTS_DIR }}/${{ steps.variables.outputs.HBUILDER_IOS_SDK_NAME }}.zip
 
     - name: New Folder
-      run: mkdir ${{ steps.dir.outputs.IOS_BUILD_DIR }}
+      run: mkdir ${{ steps.vars.outputs.IOS_BUILD_DIR }}
 
     - name: Unzip hbuilder sdk
-      run: unzip ${{ steps.dir.outputs.HBUILDER_IOS_SDK_LIB_FILE }} -d ${{ steps.variables.outputs.IOS_SDK_DIR }}
+      run: unzip ${{ steps.vars.outputs.ASSERTS_DIR }}/${{ steps.vars.outputs.HBUILDER_IOS_SDK_NAME }}.zip -d ${{ steps.vars.outputs.IOS_SDK_DIR }}
 
     - name: Force XCode 11.3
       run: sudo xcode-select -switch /Applications/Xcode_11.6.app
 
     - name: xcodebuild
       run: |
-        cd ${{ steps.variables.outputs.IOS_WORK_DIR }}
-        xcodebuild -scheme ${{ steps.variables.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.dir.outputs.IOS_BUILD_DIR }}
-        ls -al ${{ steps.dir.outputs.IOS_BUILD_DIR }} 
-        ls -al ${{ steps.dir.outputs.IOS_BUILD_DIR }}/${{ steps.variables.outputs.FRAMEWORK_NAME }}.framework
+        cd ${{ steps.vars.outputs.IOS_WORK_DIR }}
+        xcodebuild -scheme ${{ steps.vars.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.vars.outputs.IOS_BUILD_DIR }}
+        ls -al ${{ steps.vars.outputs.IOS_BUILD_DIR }}
+        ls -al ${{ steps.vars.outputs.IOS_BUILD_DIR }}/${{ steps.vars.outputs.FRAMEWORK_NAME }}.framework
 
     - name: Upload build DIST
       uses: actions/upload-artifact@v2
       with:
         name: ios-dist
-        path: ${{ steps.dir.outputs.IOS_BUILD_DIR }}
+        path: ${{ steps.vars.outputs.IOS_BUILD_DIR }}
 
 
   download:
@@ -122,12 +118,17 @@ jobs:
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+    - name: Get the release asset
+      id: get_release_asset
+      run: echo ::set-output name=RELEASE_ASSERT::jver-${{ steps.get_version.outputs.VERSION }}.zip
+
     - name: Build project 
       run: |
-        tar -jcvf jver-${{ steps.get_version.outputs.VERSION }}.tar.gz /tmp/dist
+        zip -r ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }} /tmp/dist
         ls -al
-        echo ${{ steps.get_version.outputs.VERSION }}
-        
+        echo ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -146,6 +147,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./jver-${{ steps.get_version.outputs.VERSION }}.tar.gz
-        asset_name: jver-${{ steps.get_version.outputs.VERSION }}.tar.gz
+        asset_path: ./${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
+        asset_name: ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
         asset_content_type: application/zip
