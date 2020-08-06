@@ -2,9 +2,9 @@ name: main work
 
 on:
   push:
-    # branches: [ jg ]
-    tags:
-      - 'v*.*.*'
+    branches: [ jg ]
+    # tags:
+    #   - 'v*.*.*'
 
 # env:
 #   SDK_RELEASE_VERSION: 2.6.4
