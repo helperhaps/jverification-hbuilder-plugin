@@ -43,6 +43,7 @@ jobs:
         name: android-build-asset
         path: ${{ steps.vars.outputs.ANDROID_OUTPUT_DIR }}
 
+
   build-ios:
     runs-on: macOS-latest
 
@@ -55,7 +56,8 @@ jobs:
         # echo ::set-output name=PROJECTNAME::HBuilder-uniPlugin
         echo ::set-output name=FRAMEWORK_NAME::UniPluginJVerification
         echo ::set-output name=ASSERTS_DIR::$GITHUB_WORKSPACE/assets
-        echo ::set-output name=HBUILDER_SDK_IOS::${cat package.json | grep hbuilder_sdk_ios | head -n 1 | cut -d'"' -f4}
+        # get hbuilder sdk filename for ios from package.json
+        echo ::set-output name=HBUILDER_SDK_IOS::$(cat package.json | grep hbuilder_sdk_ios | head -n 1 | cut -d'"' -f4)
         echo ::set-output name=IOS_OUTPUT_DIR::/tmp/build
         echo ::set-output name=IOS_WORK_DIR::$GITHUB_WORKSPACE/UniPlugin-JVerification-iOS
 
@@ -95,7 +97,7 @@ jobs:
         echo ::set-output name=RELEASE_DOMAIN::https://sdkfiledl.jiguang.cn/build
         echo ::set-output name=RELEASE_DIR::/tmp/releases
         # get jiguang sdk version from package.json
-        version=${cat package.json | grep jverification_sdk_release_version | head -n 1 | cut -d'"' -f4}
+        version=$(cat package.json | grep jverification_sdk_release_version | head -n 1 | cut -d'"' -f4)
         echo ::set-output name=SDK_RELEASE_VERSION::$version
         echo ::set-output name=IOS_RELEASE_FILE::jverification-ios-$version-release
         echo ::set-output name=ANDROID_RELEASE_FILE::jverification-android-release-$version
