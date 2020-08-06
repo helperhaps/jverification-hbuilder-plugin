@@ -110,7 +110,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ steps.vars.outputs.RELEASE_DIR }}
-        key: ${{ runner.os }}-sdk-releases-${{ env.SDK_RELEASE_VERSION }}-v2
+        key: ${{ runner.os }}-sdk-releases-${{ steps.vars.outputs.SDK_RELEASE_VERSION }}-v3
 
     - name: download official sdk releases
       if: steps.cache-releases.outputs.cache-hit != 'true'
