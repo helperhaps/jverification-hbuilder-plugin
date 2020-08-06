@@ -91,36 +91,33 @@ jobs:
 
     steps:
     - name: variables
-      id: variables
+      id: vars
       run: |
         echo ::set-output name=RELEASE_DOMAIN::https://sdkfiledl.jiguang.cn/build
         echo ::set-output name=RELEASE_DIR::/tmp/releases
-    - name: vars
-      id: vars
-      run: |
         echo ::set-output name=IOS_RELEASE_FILE::jverification-ios-${{ env.SDK_RELEASE_VERSION }}-release
         echo ::set-output name=ANDROID_RELEASE_FILE::jverification-android-release-${{ env.SDK_RELEASE_VERSION }}
 
     - name: New Folder
-      run: mkdir ${{ steps.variables.outputs.RELEASE_DIR }}
+      run: mkdir ${{ steps.vars.outputs.RELEASE_DIR }}
 
     - name: Cache Releases
       id: cache-releases
       uses: actions/cache@v2
       with:
-        path: ${{ steps.variables.outputs.RELEASE_DIR }}
+        path: ${{ steps.vars.outputs.RELEASE_DIR }}
         key: ${{ runner.os }}-sdk-releases-${{ env.SDK_RELEASE_VERSION }}-v2
 
     - name: download official sdk releases
       if: steps.cache-releases.outputs.cache-hit != 'true'
       run : |
-        cd ${{ steps.variables.outputs.RELEASE_DIR }}
-        curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
-        curl -O ${{ steps.variables.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
+        cd ${{ steps.vars.outputs.RELEASE_DIR }}
+        curl -O ${{ steps.vars.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
+        curl -O ${{ steps.vars.outputs.RELEASE_DOMAIN }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
 
     - name: LS
       run: |
-        cd ${{ steps.variables.outputs.RELEASE_DIR }}
+        cd ${{ steps.vars.outputs.RELEASE_DIR }}
         ls -alh
 
     - name: Upload SDK
@@ -128,8 +125,8 @@ jobs:
       with:
         name: jiguang-sdk
         path: |
-          ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
-          ${{ steps.variables.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
+          ${{ steps.vars.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
+          ${{ steps.vars.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
 
 
   release:
@@ -193,9 +190,9 @@ jobs:
 
     - name: Build project
       run: |
-        zip -r ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }} ${{ steps.vars.outputs.DIST_DIR }}
+        cd ${{ steps.vars.outputs.DIST_DIR }}
+        zip -r ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }} *
         ls -al
-        echo ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
 
     - name: Create Release
       id: create_release
