@@ -37,7 +37,7 @@ jobs:
         ./gradlew uniplugin_jverification:assembleRelease
         ls -laR ${{ steps.vars.outputs.ANDROID_OUTPUT_DIR }}
 
-    - name: Upload build DIST
+    - name: Upload build asset
       uses: actions/upload-artifact@v2
       with:
         name: android-build-asset
@@ -75,7 +75,7 @@ jobs:
         xcodebuild -scheme ${{ steps.vars.outputs.FRAMEWORK_NAME }} ONLY_ACTIVE_ARCH=NO OTHER_CFLAGS="-fembed-bitcode" -configuration 'Release' -sdk iphoneos clean build TARGET_BUILD_DIR=${{ steps.vars.outputs.IOS_OUTPUT_DIR }}
         ls -al ${{ steps.vars.outputs.IOS_OUTPUT_DIR }}
 
-    - name: Upload build DIST
+    - name: Upload build asset
       uses: actions/upload-artifact@v2
       with:
         name: ios-build-asset
@@ -88,6 +88,7 @@ jobs:
     outputs:
       IOS: ${{ steps.vars.outputs.IOS_RELEASE_FILE }}
       ANDROID: ${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
+
     steps:
     - uses: actions/checkout@v2
 
@@ -135,42 +136,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      uses: actions/download-artifact@v2
 
     - name: variables
       id: vars
       run: |
-        echo ::set-output name=DATA_DIR::/tmp/data
         echo ::set-output name=DIST_DIR::/tmp/dist
 
     - name: New Folder
-      run: mkdir -p ${{ steps.vars.outputs.DATA_DIR }} ${{ steps.vars.outputs.DIST_DIR }}/android ${{ steps.vars.outputs.DIST_DIR }}/ios
-
-    - name: Download Sdk Data
-      uses: actions/download-artifact@v2
-      with:
-        name: jiguang-sdk
-        path: ${{ steps.vars.outputs.DATA_DIR }}
-    - name: Download iOS Data
-      uses: actions/download-artifact@v2
-      with:
-        name: ios-build-asset
-        path: ${{ steps.vars.outputs.DATA_DIR }}
-    - name: Download Android Data
-      uses: actions/download-artifact@v2
-      with:
-        name: android-build-asset
-        path: ${{ steps.vars.outputs.DATA_DIR }}
+      run: mkdir -p ${{ steps.vars.outputs.DIST_DIR }}/android ${{ steps.vars.outputs.DIST_DIR }}/ios
 
     - name: decompress official sdk releases
       run: |
-        cd ${{ steps.vars.outputs.DATA_DIR }}
         unzip ${{ needs.download.outputs.IOS }}.zip
         unzip ${{ needs.download.outputs.ANDROID }}.zip
-        ls -al
 
     - name: make releases
       run: |
-        cd ${{ steps.vars.outputs.DATA_DIR }}
         ls -al
         cp $GITHUB_WORKSPACE/package.json ${{ steps.vars.outputs.DIST_DIR }}
         mv ${{ needs.download.outputs.ANDROID }}/libs ${{ steps.vars.outputs.DIST_DIR }}/android
