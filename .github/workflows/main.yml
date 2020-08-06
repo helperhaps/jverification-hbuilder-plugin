@@ -139,7 +139,7 @@ jobs:
     - name: variables
       id: vars
       run: |
-        echo ::set-output name=DATA_DIR::/tmp
+        echo ::set-output name=DATA_DIR::/tmp/data
         echo ::set-output name=DIST_DIR::/tmp/dist
 
     - name: New Folder
