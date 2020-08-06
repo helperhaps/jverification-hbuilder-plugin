@@ -91,6 +91,8 @@ jobs:
       ANDROID: ${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}
 
     steps:
+    - uses: actions/checkout@v2
+
     - name: variables
       id: vars
       run: |
