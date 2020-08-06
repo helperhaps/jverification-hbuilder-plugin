@@ -2,9 +2,9 @@ name: main work
 
 on:
   push:
-    branches: [ jg ]
+    # branches: [ jg ]
     tags:
-      # - 'v*.*.*'
+      - 'v*.*.*'
 env:
   SDK_RELEASE_VERSION: 2.6.4
 
@@ -183,38 +183,38 @@ jobs:
         ls -al ${{ steps.vars.outputs.DIST_DIR }}/android
         ls -al ${{ steps.vars.outputs.DIST_DIR }}/ios
 
-    # - name: Get the version
-    #   id: get_version
-    #   run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
-    # - name: Get the release asset
-    #   id: get_release_asset
-    #   run: echo ::set-output name=RELEASE_ASSERT::jver-${{ steps.get_version.outputs.VERSION }}.zip
+    - name: Get the release asset
+      id: get_release_asset
+      run: echo ::set-output name=RELEASE_ASSERT::jver-${{ steps.get_version.outputs.VERSION }}.zip
 
-    # - name: Build project
-    #   run: |
-    #     zip -r ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }} /tmp/dist
-    #     ls -al
-    #     echo ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
+    - name: Build project
+      run: |
+        zip -r ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }} ${{ steps.vars.outputs.DIST_DIR }}
+        ls -al
+        echo ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
 
-    # - name: Create Release
-    #   id: create_release
-    #   uses: actions/create-release@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: ${{ steps.get_version.outputs.VERSION }}
-    #     release_name: ${{ steps.get_version.outputs.VERSION }}
-    #     draft: false
-    #     prerelease: false
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: ${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false
 
-    # - name: Upload Release Asset
-    #   id: upload-release-asset
-    #   uses: actions/upload-release-asset@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-    #     asset_path: ./${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
-    #     asset_name: ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
-    #     asset_content_type: application/zip
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
+        asset_name: ${{ steps.get_release_asset.outputs.RELEASE_ASSERT }}
+        asset_content_type: application/zip
