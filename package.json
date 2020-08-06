@@ -3,6 +3,7 @@
 	"id": "JG-JVerification",
 	"version": "1.0.5",
 	"jverification_sdk_release_version": "2.6.4",
+	"hbuilder_sdk_ios": "iOSSDK@2.7.9.80164_20200527",
 	"description": "极光认证Hbuilder插件",
 	"_dp_type":"nativeplugin",
 	"_dp_nativeplugin":{
