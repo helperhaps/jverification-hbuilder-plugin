@@ -40,7 +40,7 @@ jobs:
     - name: Upload build asset
       uses: actions/upload-artifact@v2
       with:
-        name: android-build-asset
+        name: data
         path: ${{ steps.vars.outputs.ANDROID_OUTPUT_DIR }}
 
 
@@ -78,7 +78,7 @@ jobs:
     - name: Upload build asset
       uses: actions/upload-artifact@v2
       with:
-        name: ios-build-asset
+        name: data
         path: ${{ steps.vars.outputs.IOS_OUTPUT_DIR }}
 
 
@@ -123,7 +123,7 @@ jobs:
     - name: Upload SDK
       uses: actions/upload-artifact@v2
       with:
-        name: jiguang-sdk
+        name: data
         path: |
           ${{ steps.vars.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.IOS_RELEASE_FILE }}.zip
           ${{ steps.vars.outputs.RELEASE_DIR }}/${{ steps.vars.outputs.ANDROID_RELEASE_FILE }}.zip
@@ -139,7 +139,7 @@ jobs:
     - name: variables
       id: vars
       run: |
-        echo ::set-output name=DATA_DIR::/tmp/data
+        echo ::set-output name=DATA_DIR::/tmp
         echo ::set-output name=DIST_DIR::/tmp/dist
 
     - name: New Folder
@@ -153,9 +153,10 @@ jobs:
     - name: decompress official sdk releases
       run: |
         cd ${{ steps.vars.outputs.DATA_DIR }}
+        ls -al
+
         unzip ${{ needs.download.outputs.IOS }}.zip
         unzip ${{ needs.download.outputs.ANDROID }}.zip
-        ls -al
 
     - name: make releases
       run: |
